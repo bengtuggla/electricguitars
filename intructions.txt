@@ -1,0 +1,72 @@
+1. SKapa mapp med tre filer: index.html-styles.css-script.js och länka dem
+2. Skapa Css grunden
+3. Skapa Array med div objekt (menu-items, instruments, cars...) i script.js
+4. Hämta sectionen med querySelector där items ska läggas
+5. Lägg eventListener DomContentLoaded på windows. I dess funktionskropp anropas funktion med argumentet arrayens namn. Funktionen ska mappa ut artiklarnas keys + html-kod joinade utan komma till en array.
+6. Skapa FunktionenFunktionen ska efter mappningen men inuti funktionen göra två saker
+  - Joina artiklarna utan kommatecken
+  - Lägga in den nya arrayen från mappningen till sectionens innerHTML
+
+7. SÖKFUNKTION
+  - Hitta UNIKA Categories (inga dubletter)
+  - Loopa över Categories return buttons
+  - Se till att välja buttons när de är tillgängliga
+  - Skapa knappar i html button.filter-btn type button data-id:'gibson' eller t.ex fender efter category i databasen
+  - KOMMENTERA BORT KNAPPARNA i HTML- de ska ju skapas dynamiskt men vi behöver html-koden senare
+
+8. Hitta unika Categories - Skapa funktionen i window DomContentLoadeds funktion under getItems(menu) anropet. SENARE refactorerar vi och flyttar dennna funktion.  
+  - Vi mappar menu och returnerar BARA Categories till ny array categories (return item.category). 
+  - Men......vi får dubletterna då 
+0: "fender"
+1: "fender"
+2: "fender"
+3: "gibson"
+4: "gibson"
+5: "gibson"
+6: "gibson"
+7: "gibson"
+8: "gibson"
+
+  - Vi byter då ut map mot reduce. I slutet av reduce måste vi ha ett STARTVÄRDE. Brukar vara typ 0. Men vi kan ange en array med "all" istället.
+  - const categories = instruments.reduce(function (item) {}, ['all']);
+  - reduce tar också TVÅ PARAMETRAR (accumulator, current) men vi kan döpa dem valfritt.
+  - const categories = instruments.reduce(function (values, item) {}, ['all']);
+  - Med reduce MÅSTE man returnera accumulatorn (values). return values.
+  - Vi ska nu kolla om INTE values inkluderar item.category (alltså när loopen på objektet körs ifall INTE kategorin redn ligger i values som ju samlar in kategorierna så vad händer då?)
+  - DÅ = pusha in kategorin i values.....annars händer ingenting
+  if(!values.includes(item.category)){values.push(item.category)}
+
+  RESULTAT Om man loggar categories:
+   ["all", "fender", "gibson"]
+0: "all"
+1: "fender"
+2: "gibson"
+
+
+9. Dynamiskt skapa Category buttons
+- I slutet på window eventlistener blocket lägger vi detta (efter reduce).
+-Vi mappar den av reduce skapade arrayen categories (som innehåller all, fender, gibson) och lägger mappningen i en variabel.
+
+10. Hämta diven som ska innehålla knapparna och lägg i en variabel. const btnContainer = document.querySelector('.btn-container');
+11. Skapa knappar. Gör som tidigare genom att returnera Button HTML-kod som Template String. OBS! data-id + knapptext = ${category} och category skickas in i mappningen som parameter. Joina strängarna (två sätt: 1. häng bara på .join('') på mappningen eller som tidigare xxx = xxx.join(''))
+Lägg kategorivariabeln i knappvariabelns innerHTML btnContainer.innerHTML = categoryBtns;
+
+12. Knapparna skapas ju dynamiskt så vi når dem inte för att köra foreach etc. på dem för filterfunktion. Men vi når dem i koden EFTER att de har skapats.
+    Enklast FLYTTAR vi querySelector anropet till filterknapp till UNDER raden där vi dynamiskt lägger dem i knappdivens innerHTML. Om vi inte tidigare har hämtat knappen så skriver vi en queryselector där nu 
+       btnContainer.innerHTML = categoryBtns;
+       const filterBtns = document.querySelector('.filter-btn');
+
+13. FILTER------DIREKT efter dessa två kodrader i slutet av window eventListener så lägger vi en foreach på knapparna
+
+-filterBtns.foreach(function(btn){})
+- på varje knapp lägger vi till clickevent  btn.addEventListener('click', function(e){})
+- INUTI eventlistenern ska hända TRE saker  
+  1. Skapa variabel och lägg e.currentTarget.dataset.id  där
+  2. Skapa variabel och kör filter på instruments. I filters funktion kör ifsats OM objektets.category === nyss skapade variabel punkt 1 (dataset.id) 
+    SÅ---returnera objektet-
+    ANNARS---inget annars
+
+ 3. Fixa ALL-knappen
+    - If-sats ...dataset.id variabeln === 'all'
+    DÅ...anropa getItems(instruments)
+    ANNARS anropa getItems(den nyss skapade filtervariabeln)
